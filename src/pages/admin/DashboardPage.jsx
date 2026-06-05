@@ -19,6 +19,8 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState('');
 
+  const [exporting, setExporting] = useState(false);
+
   const fetchEvents = async () => {
     try {
       setLoading(true);
@@ -29,6 +31,32 @@ export default function AdminDashboardPage() {
       setError(err.response?.data?.message || 'Gagal memuat data event.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleExportAll = async () => {
+    try {
+      setExporting(true);
+      setError('');
+      const response = await api.get('/attendances/export', {
+        responseType: 'blob',
+      });
+      const blob = new Blob([response.data], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `Laporan_Absensi_Semua_Event.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      setError('Gagal mengekspor laporan. Silakan coba lagi.');
+      console.error(err);
+    } finally {
+      setExporting(false);
     }
   };
 
@@ -47,7 +75,26 @@ export default function AdminDashboardPage() {
             Halo, <span className="font-semibold text-primary">{user?.name}</span> — kelola event absensi BEM FTI.
           </p>
         </div>
-        <div className="flex gap-2.5 self-start sm:self-auto">
+        <div className="flex flex-wrap gap-2.5 self-start sm:self-auto">
+          <button
+            onClick={handleExportAll}
+            disabled={exporting}
+            className="btn-secondary btn-sm"
+          >
+            {exporting ? (
+              <>
+                <LoadingSpinner size="sm" />
+                Mengekspor...
+              </>
+            ) : (
+              <>
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                Export Excel Semua
+              </>
+            )}
+          </button>
           {user?.role === 'super_admin' && (
             <Link to="/admin/users" className="btn-secondary btn-sm">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

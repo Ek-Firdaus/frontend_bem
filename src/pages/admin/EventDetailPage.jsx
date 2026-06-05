@@ -58,6 +58,8 @@ export default function EventDetailPage() {
   const [loadingEvent, setLoadingEvent]           = useState(!location.state?.event);
   const [loadingAttendances, setLoadingAttendances] = useState(true);
   const [toggling, setToggling]       = useState(false);
+  const [exporting, setExporting]     = useState(false);
+  const [deleting, setDeleting]       = useState(false);
   const [eventError, setEventError]   = useState('');
   const [toggleError, setToggleError] = useState('');
   const [toggleSuccess, setToggleSuccess] = useState('');
@@ -125,6 +127,53 @@ export default function EventDetailPage() {
     }
   };
 
+  const handleExport = async () => {
+    if (!event) return;
+    try {
+      setExporting(true);
+      setToggleError('');
+      setToggleSuccess('');
+      const response = await api.get(`/attendances/${event.id}/export`, {
+        responseType: 'blob',
+      });
+      const blob = new Blob([response.data], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `Laporan_Absensi_${event.name.replace(/\s+/g, '_')}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      setToggleError('Gagal mengekspor laporan event.');
+      console.error(err);
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!event) return;
+    if (!window.confirm(`Apakah Anda yakin ingin menghapus event "${event.name}"? Tindakan ini tidak dapat dibatalkan.`)) {
+      return;
+    }
+    
+    try {
+      setDeleting(true);
+      setToggleError('');
+      setToggleSuccess('');
+      await api.delete(`/events/${event.id}`);
+      navigate('/admin/dashboard', { replace: true });
+    } catch (err) {
+      setToggleError(err.response?.data?.message || 'Gagal menghapus event.');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   if (loadingEvent) {
     return (
       <div className="flex justify-center items-center py-24">
@@ -145,20 +194,63 @@ export default function EventDetailPage() {
   return (
     <div className="animate-fade-in space-y-6 max-w-4xl">
       {/* Page header */}
-      <div className="flex items-start gap-3">
-        <button onClick={() => navigate('/admin/dashboard')} className="btn-ghost btn-sm p-2 mt-0.5">
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
-        <div className="flex-1 min-w-0">
-          <div className="flex flex-wrap items-center gap-2 mb-1">
-            <h1 className="page-title truncate">{event.name}</h1>
-            <StatusBadge isActive={event.is_active} />
+      <div className="page-header flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+        <div className="flex items-start gap-3">
+          <button onClick={() => navigate('/admin/dashboard')} className="btn-ghost btn-sm p-2 mt-0.5" aria-label="Kembali ke Dashboard">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <div className="flex-1 min-w-0">
+            <div className="flex flex-wrap items-center gap-2 mb-1">
+              <h1 className="page-title truncate">{event.name}</h1>
+              <StatusBadge isActive={event.is_active} />
+            </div>
+            <p className="page-subtitle">
+              {formatDate(event.start_time)} — {formatDate(event.end_time)}
+            </p>
           </div>
-          <p className="page-subtitle">
-            {formatDate(event.start_time)} — {formatDate(event.end_time)}
-          </p>
+        </div>
+
+        <div className="flex flex-wrap gap-2.5 self-start sm:self-auto ml-10 sm:ml-0">
+          <button
+            onClick={handleExport}
+            disabled={exporting}
+            className="btn-secondary btn-sm"
+          >
+            {exporting ? (
+              <>
+                <LoadingSpinner size="sm" />
+                Mengekspor...
+              </>
+            ) : (
+              <>
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                Export Excel
+              </>
+            )}
+          </button>
+          <button
+            onClick={handleDelete}
+            disabled={deleting}
+            className="btn-danger btn-sm"
+          >
+            {deleting ? (
+              <>
+                <LoadingSpinner size="sm" color="white" />
+                Menghapus...
+              </>
+            ) : (
+              <>
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Hapus Event
+              </>
+            )}
+          </button>
         </div>
       </div>
 
@@ -236,7 +328,7 @@ export default function EventDetailPage() {
             <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
               <div>
                 <h2 className="text-sm font-semibold text-gray-700">Log Absensi</h2>
-                <p className="text-xs text-gray-400 mt-0.5">{attendances.length} peserta hadir</p>
+                <p className="text-xs text-gray-400 mt-0.5">{attendances.filter(a => a.clock_in !== null).length} peserta hadir</p>
               </div>
               <button
                 onClick={fetchAttendances}

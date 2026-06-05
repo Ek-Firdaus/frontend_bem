@@ -28,36 +28,48 @@
 - [x] `GET /events` — List semua event
 - [x] `GET /events/:id` — Detail event
 - [x] `PUT /events/:id/` — Buka/tutup sesi absensi, generate token baru saat dibuka, insert `absent` ke semua member yang belum hadir saat ditutup
+- [x] `DELETE /events/:id` — Hapus event (admin_psdm, super_admin)
+
 - [x] `POST /attendances/` — Member input token untuk presensi
 - [x] `GET /attendances/:event_id` — Lihat log presensi per event (admin_psdm, super_admin)
 - [x] `GET /my-attendances` — Lihat log presensi per user (member)
-- [ ] `GET /attendances/export/:event_id` — Export laporan presensi (CSV/PDF)
+- [x] `GET /attendances/export/` — Export laporan presensi semua event(excel) (super_admin, admin_psdm)
+- [x] `GET /attendances/:event_id/export/` — Export laporan presensi per event(excel) (super_admin, admin_psdm)
 
-### Frontend — 🔲 Belum Dimulai
+- [x] `GET /users/profile` — Lihat data diri user (member)
+- [x] `PATCH /users/profile` — Update password user (member)
+
+Menambahkan endpoint untuk kelola users pada super admin
+- [x] `POST /users` — Buat user baru (admin_psdm, super_admin)
+- [x] `GET /users` — List semua user (admin_psdm, super_admin)
+- [x] `PUT /users/:id` — Update data user (admin_psdm, super_admin)
+- [x] `DELETE /users/:id` — Hapus user (admin_psdm, super_admin)
+
+### Frontend — ✅ Selesai
 
 **Halaman Auth**
 
-- [ ] Halaman Login (input npm + password)
-- [ ] Simpan JWT ke localStorage / cookie
-- [ ] Protected route berdasarkan role
-- [ ] Redirect ke dashboard sesuai role setelah login
+- [x] Halaman Login (input npm + password)
+- [x] Simpan JWT ke localStorage / cookie
+- [x] Protected route berdasarkan role
+- [x] Redirect ke dashboard sesuai role setelah login
 
 **Dashboard Admin (admin_psdm & super_admin)**
 
-- [ ] Halaman list semua event (tabel dengan status aktif/nonaktif)
-- [ ] Form buat event baru (nama, start_time, end_time, is_active)
-- [ ] Halaman detail event — tampilkan token aktif secara besar & jelas
-- [ ] Toggle buka/tutup sesi absensi (tampilkan token baru saat dibuka)
-- [ ] Countdown timer saat sesi aktif
-- [ ] Tabel real-time log absensi (nama, npm, clock_in_time, status)
-- [ ] Tombol export laporan (CSV / PDF)
+- [x] Halaman list semua event (tabel dengan status aktif/nonaktif)
+- [x] Form buat event baru (nama, start_time, end_time, is_active)
+- [x] Halaman detail event — tampilkan token aktif secara besar & jelas
+- [x] Toggle buka/tutup sesi absensi (tampilkan token baru saat dibuka)
+- [x] Countdown timer saat sesi aktif
+- [x] Tabel real-time log absensi (nama, npm, clock_in_time, status)
+- [x] Tombol export laporan (Excel)
 
 **Halaman Member**
 
-- [ ] Input box token absensi (clean, mobile-friendly)
-- [ ] Validasi token salah/expired tanpa refresh halaman
-- [ ] Tombol submit otomatis terkunci saat sesi ditutup admin
-- [ ] Tampilkan konfirmasi sukses absen (warna Emerald Green)
+- [x] Input box token absensi (clean, mobile-friendly)
+- [x] Validasi token salah/expired tanpa refresh halaman
+- [x] Tombol submit otomatis terkunci saat sesi ditutup admin
+- [x] Tampilkan konfirmasi sukses absen (warna Emerald Green)
 
 ---
 
