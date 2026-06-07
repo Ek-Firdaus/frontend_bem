@@ -21,6 +21,7 @@ export default function ManageUsersPage() {
   const [users, setUsers] = useState([]);
   const [usersLoading, setUsersLoading] = useState(true);
   const [listError, setListError] = useState('');
+  const [listSuccess, setListSuccess] = useState('');
 
   // Edit User States
   const [editingUser, setEditingUser] = useState(null); // User object being edited
@@ -162,8 +163,9 @@ export default function ManageUsersPage() {
       fetchUsers();
       handleCloseEditModal();
       
-      // Show success alert
-      alert(`Data pengguna "${editName}" berhasil diperbarui.`);
+      // Show inline success banner
+      setListSuccess(`Data pengguna "${editName}" berhasil diperbarui.`);
+      setTimeout(() => setListSuccess(''), 4000);
     } catch (err) {
       setEditError(err.response?.data?.message || 'Gagal memperbarui data pengguna.');
     } finally {
@@ -222,6 +224,15 @@ export default function ManageUsersPage() {
               </svg>
             </button>
           </div>
+
+          {listSuccess && (
+            <div className="mx-5 mt-4 alert-success animate-fade-in">
+              <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span>{listSuccess}</span>
+            </div>
+          )}
 
           {usersLoading && users.length === 0 ? (
             <div className="flex justify-center items-center py-20">
