@@ -119,7 +119,7 @@ export default function MemberLayout() {
           </div>
           <div className="min-w-0">
             <p className="text-sm font-semibold text-white truncate">{user?.name}</p>
-            <p className="text-xs text-slate-400 capitalize">{user?.role?.replace('_', ' ')}</p>
+            <p className="text-xs text-slate-400">{user?.division || '-'}</p>
           </div>
         </div>
         <button

@@ -177,7 +177,7 @@ export default function ManageUsersPage() {
     <div className="animate-fade-in space-y-6">
       {/* Page Header */}
       <div className="page-header">
-        <h1 className="page-title">Kelola User</h1>
+        <h1 className="page-title">Kelola Pengguna</h1>
         <p className="page-subtitle">Kelola akun anggota SIM BEM FTI. Pengguna tidak bisa mendaftar sendiri untuk menjaga keamanan data.</p>
       </div>
 
