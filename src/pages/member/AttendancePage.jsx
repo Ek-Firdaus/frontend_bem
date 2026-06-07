@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../../api/axios';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 
@@ -69,7 +70,18 @@ export default function AttendancePage() {
   return (
     <div className="animate-fade-in">
       <div className="page-header">
-        <h1 className="page-title">Presensi</h1>
+        <div className="flex items-center gap-3 flex-wrap">
+          <Link
+            to="/member/dashboard"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-primary bg-primary/10 hover:bg-primary/20 transition-colors duration-200 no-underline flex-shrink-0"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+            Kembali
+          </Link>
+          <h1 className="page-title !mb-0">Presensi</h1>
+        </div>
         <p className="page-subtitle">Pilih event dan masukkan token yang diberikan oleh panitia.</p>
       </div>
 
@@ -97,7 +109,7 @@ export default function AttendancePage() {
               onClick={handleReset}
               className="btn-primary w-full"
             >
-              Absen Event Lain
+             Presensi Acara Lain
             </button>
           </div>
         ) : (
@@ -115,11 +127,11 @@ export default function AttendancePage() {
 
               {/* Event Select Dropdown */}
               <div className="form-group">
-                <label htmlFor="event_id" className="label">Nama Event</label>
+                <label htmlFor="event_id" className="label">Nama Acara</label>
                 {loadingEvents ? (
                   <div className="flex items-center gap-2 py-2 px-3 border border-gray-200 rounded-lg bg-gray-50 text-gray-500 text-sm">
                     <LoadingSpinner size="sm" />
-                    <span>Memuat daftar event aktif...</span>
+                    <span>Memuat daftar acara aktif...</span>
                   </div>
                 ) : events.length === 0 ? (
                   <div className="flex flex-col gap-1">
@@ -142,7 +154,7 @@ export default function AttendancePage() {
                     disabled={loading}
                     className="input bg-white text-gray-900"
                   >
-                    <option value="">-- Pilih Event Aktif --</option>
+                    <option value="">-- Pilih Acara Aktif --</option>
                     {events.map((e) => (
                       <option key={e.id} value={e.id}>
                         {e.name}
@@ -154,7 +166,7 @@ export default function AttendancePage() {
 
               {/* Token */}
               <div className="form-group">
-                <label htmlFor="token" className="label">Token Absensi</label>
+                <label htmlFor="token" className="label">Token Presensi</label>
                 <input
                   id="token"
                   name="token"
@@ -185,7 +197,7 @@ export default function AttendancePage() {
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    Kirim Absensi
+                    Kirim Presensi
                   </>
                 )}
               </button>
@@ -196,7 +208,7 @@ export default function AttendancePage() {
               <svg className="w-4 h-4 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
               </svg>
-              <span>Daftar di atas hanya menampilkan event yang sedang aktif. Hubungi panitia jika event yang Anda cari tidak ada.</span>
+              <span>Daftar di atas hanya menampilkan acara yang sedang aktif. Hubungi panitia jika acara yang Anda cari tidak ada.</span>
             </div>
           </div>
         )}

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../../api/axios';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 
@@ -36,8 +37,19 @@ export default function HistoryPage() {
   return (
     <div className="animate-fade-in">
       <div className="page-header">
-        <h1 className="page-title">Riwayat Absensi</h1>
-        <p className="page-subtitle">Daftar kehadiranmu di semua event BEM FTI.</p>
+        <div className="flex items-center gap-3 flex-wrap">
+          <Link
+            to="/member/dashboard"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-primary bg-primary/10 hover:bg-primary/20 transition-colors duration-200 no-underline flex-shrink-0"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+            Kembali
+          </Link>
+          <h1 className="page-title !mb-0">Riwayat Presensi</h1>
+        </div>
+        <p className="page-subtitle">Daftar kehadiranmu di semua acara BEM FTI.</p>
       </div>
 
       {loading ? (
@@ -51,8 +63,8 @@ export default function HistoryPage() {
           <svg className="w-14 h-14 mb-3 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
           </svg>
-          <p className="font-medium text-gray-600">Belum ada riwayat absensi</p>
-          <p className="text-sm mt-1">Absensi kamu akan muncul di sini setelah kamu mengikuti event.</p>
+          <p className="font-medium text-gray-600">Belum ada riwayat presensi</p>
+          <p className="text-sm mt-1">Presensi kamu akan muncul di sini setelah kamu mengikuti acara.</p>
         </div>
       ) : (
         <>
