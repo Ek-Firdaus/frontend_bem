@@ -51,8 +51,8 @@ export default function LoginPage() {
         <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
           {/* Header strip */}
           <div className="bg-gradient-to-r from-primary-dark to-primary px-8 pt-10 pb-8">
-            <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center mb-4">
-              <span className="text-white font-extrabold text-lg">B</span>
+            <div className="w-12 h-12 rounded-2xl overflow-hidden flex items-center justify-center mb-4">
+              <img src="/logo-bem.png" alt="Logo BEM FTI" className="w-full h-full object-contain" />
             </div>
             <h1 className="text-2xl font-bold text-white leading-tight">Selamat Datang</h1>
             <p className="text-sm text-blue-200 mt-1">Masuk ke SIM-BEM FTI</p>

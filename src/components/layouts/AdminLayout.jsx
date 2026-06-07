@@ -105,9 +105,7 @@ export default function AdminLayout() {
           {/* Logo */}
           <div className="px-6 py-6 border-b border-white/10">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center font-bold text-white text-sm">
-                BEM
-              </div>
+              <img src="/logo-bem.png" alt="Logo BEM FTI" className="w-9 h-9 rounded-xl object-contain" />
               <div>
                 <p className="font-bold text-white text-sm leading-tight">SIM-BEM</p>
                 <p className="text-xs text-slate-400">Sistem Informasi</p>
