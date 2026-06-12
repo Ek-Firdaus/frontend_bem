@@ -24,14 +24,28 @@ export default function ManageUsersPage() {
   const [listSuccess, setListSuccess] = useState('');
 
   // Edit User States
-  const [editingUser, setEditingUser] = useState(null); // User object being edited
+  const [editingUser, setEditingUser] = useState(null);
   const [editName, setEditName] = useState('');
   const [editNpm, setEditNpm] = useState('');
   const [editDivision, setEditDivision] = useState('');
   const [editRole, setEditRole] = useState('member');
-  const [editPassword, setEditPassword] = useState(''); // Optional password reset
   const [editLoading, setEditLoading] = useState(false);
   const [editError, setEditError] = useState('');
+
+  // Sensitive Action Modal States
+  const [actionUser, setActionUser] = useState(null);
+  const [actionTab, setActionTab] = useState('reset'); // 'reset' | 'delete'
+
+  // Reset Password States
+  const [resetNewPw, setResetNewPw] = useState('');
+  const [resetConfirmPw, setResetConfirmPw] = useState('');
+  const [resetLoading, setResetLoading] = useState(false);
+  const [resetError, setResetError] = useState('');
+
+  // Delete Confirmation States
+  const [deleteConfirmNpm, setDeleteConfirmNpm] = useState('');
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
 
   // Fetch all users
   const fetchUsers = useCallback(async () => {
@@ -99,24 +113,6 @@ export default function ManageUsersPage() {
     }
   };
 
-  // Handle delete user — backend SQL doesn't return `id`, so we use `npm` as identifier
-  const handleDeleteUser = async (userToDelete) => {
-    if (!window.confirm(`Apakah Anda yakin ingin menghapus pengguna "${userToDelete.name}" (NPM: ${userToDelete.npm})?`)) {
-      return;
-    }
-
-    try {
-      setListError('');
-      // Use id if available, otherwise fall back to npm
-      const identifier = userToDelete.id || userToDelete.npm;
-      await api.delete(`/users/${identifier}`);
-      // Remove from local state
-      setUsers((prev) => prev.filter((u) => u.npm !== userToDelete.npm));
-    } catch (err) {
-      setListError(err.response?.data?.message || 'Gagal menghapus pengguna.');
-    }
-  };
-
   // Open edit modal
   const handleOpenEditModal = (targetUser) => {
     setEditingUser(targetUser);
@@ -124,52 +120,96 @@ export default function ManageUsersPage() {
     setEditNpm(targetUser.npm || '');
     setEditDivision(targetUser.division || '');
     setEditRole(targetUser.role || 'member');
-    setEditPassword('');
     setEditError('');
   };
 
-  // Close edit modal
-  const handleCloseEditModal = () => {
-    setEditingUser(null);
-  };
+  const handleCloseEditModal = () => setEditingUser(null);
 
-  // Handle edit user submit
+  // Handle edit user submit (no password)
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     setEditError('');
-
     if (!editName.trim() || !editNpm.trim() || !editDivision.trim() || !editRole) {
       setEditError('Semua field wajib diisi.');
       return;
     }
-
     try {
       setEditLoading(true);
-      const updateData = {
+      await api.put(`/users/${editingUser.id}`, {
         name: editName.trim(),
         npm: editNpm.trim(),
         division: editDivision.trim(),
         role: editRole,
-      };
-
-      // Only send password if user filled it
-      if (editPassword.trim()) {
-        updateData.password = editPassword;
-      }
-
-      await api.put(`/users/${editingUser.id}`, updateData);
-
-      // Refresh user list
+      });
       fetchUsers();
       handleCloseEditModal();
-      
-      // Show inline success banner
       setListSuccess(`Data pengguna "${editName}" berhasil diperbarui.`);
       setTimeout(() => setListSuccess(''), 4000);
     } catch (err) {
       setEditError(err.response?.data?.message || 'Gagal memperbarui data pengguna.');
     } finally {
       setEditLoading(false);
+    }
+  };
+
+  // Open sensitive action modal
+  const handleOpenActionModal = (targetUser) => {
+    setActionUser(targetUser);
+    setActionTab('reset');
+    setResetNewPw('');
+    setResetConfirmPw('');
+    setResetError('');
+    setDeleteConfirmNpm('');
+    setDeleteError('');
+  };
+
+  const handleCloseActionModal = () => setActionUser(null);
+
+  // Handle reset password
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
+    setResetError('');
+    if (!resetNewPw || !resetConfirmPw) {
+      setResetError('Semua field wajib diisi.');
+      return;
+    }
+    if (resetNewPw.length < 8) {
+      setResetError('Password minimal 8 karakter.');
+      return;
+    }
+    if (resetNewPw !== resetConfirmPw) {
+      setResetError('Password baru dan konfirmasi tidak cocok.');
+      return;
+    }
+    try {
+      setResetLoading(true);
+      await api.put(`/users/${actionUser.id}`, { password: resetNewPw });
+      handleCloseActionModal();
+      setListSuccess(`Password pengguna "${actionUser.name}" berhasil direset.`);
+      setTimeout(() => setListSuccess(''), 4000);
+    } catch (err) {
+      setResetError(err.response?.data?.message || 'Gagal mereset password.');
+    } finally {
+      setResetLoading(false);
+    }
+  };
+
+  // Handle delete user
+  const handleDeleteUser = async () => {
+    if (!actionUser) return;
+    try {
+      setDeleteLoading(true);
+      setDeleteError('');
+      const identifier = actionUser.id || actionUser.npm;
+      await api.delete(`/users/${identifier}`);
+      setUsers((prev) => prev.filter((u) => u.npm !== actionUser.npm));
+      handleCloseActionModal();
+      setListSuccess(`Pengguna "${actionUser.name}" berhasil dihapus.`);
+      setTimeout(() => setListSuccess(''), 4000);
+    } catch (err) {
+      setDeleteError(err.response?.data?.message || 'Gagal menghapus pengguna.');
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -288,12 +328,13 @@ export default function ManageUsersPage() {
                             </svg>
                           </button>
                           <button
-                            onClick={() => handleDeleteUser(u)}
-                            className="btn-ghost btn-sm text-red-600 hover:text-red-800 p-1"
-                            title="Hapus User"
+                            onClick={() => handleOpenActionModal(u)}
+                            className="btn-ghost btn-sm text-gray-500 hover:text-gray-700 p-1"
+                            title="Aksi Sensitif"
                           >
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
                           </button>
                         </div>
@@ -507,19 +548,6 @@ export default function ManageUsersPage() {
                 </select>
               </div>
 
-              <div className="form-group">
-                <label className="label" htmlFor="edit-password">Reset Password (Opsional)</label>
-                <input
-                  type="password"
-                  id="edit-password"
-                  className="input"
-                  placeholder="Kosongkan jika tidak ingin mereset password"
-                  value={editPassword}
-                  onChange={(e) => setEditPassword(e.target.value)}
-                  disabled={editLoading}
-                />
-              </div>
-
               <div className="flex gap-3 pt-3 border-t border-gray-100 mt-5">
                 <button
                   type="button"
@@ -545,6 +573,139 @@ export default function ManageUsersPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {/* SENSITIVE ACTION MODAL WITH SIDEBAR */}
+      {actionUser && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white rounded-2xl max-w-2xl w-full shadow-xl animate-slide-up relative max-h-[90vh] overflow-hidden flex flex-col sm:flex-row">
+            {/* Sidebar */}
+            <div className="sm:w-52 flex-shrink-0 bg-gray-50 border-b sm:border-b-0 sm:border-r border-gray-200">
+              <div className="px-4 py-4 border-b border-gray-200">
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Aksi Sensitif 
+                  <span className="text-xs font-bold text-gray-900 truncate mt-0.5">{actionUser.name}</span>
+                </p>
+
+              </div>
+              <nav className="flex sm:flex-col p-2 gap-1">
+                <button
+                  onClick={() => { setActionTab('reset'); setResetError(''); }}
+                  className={`flex items-center gap-2.5 w-full px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 text-left ${
+                    actionTab === 'reset'
+                      ? 'bg-primary/10 text-primary'
+                      : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                  Reset Password
+                </button>
+                <button
+                  onClick={() => { setActionTab('delete'); setDeleteError(''); setDeleteConfirmNpm(''); }}
+                  className={`flex items-center gap-2.5 w-full px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 text-left ${
+                    actionTab === 'delete'
+                      ? 'bg-red-50 text-red-600'
+                      : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                  Hapus Pengguna
+                </button>
+              </nav>
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 p-6 overflow-y-auto">
+              {/* Close button */}
+              <button onClick={handleCloseActionModal} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 p-1 z-10" aria-label="Tutup">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+
+              {actionTab === 'reset' ? (
+                /* RESET PASSWORD TAB */
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-1">Reset Password</h3>
+                  <p className="text-sm text-gray-500 mb-5">Atur password baru untuk <span className="font-semibold text-gray-700">{actionUser.name}</span></p>
+
+                  {resetError && (
+                    <div className="alert-error mb-4 animate-fade-in">
+                      <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                      </svg>
+                      <span>{resetError}</span>
+                    </div>
+                  )}
+
+                  <form onSubmit={handleResetPassword} className="space-y-4" noValidate>
+                    <div className="form-group">
+                      <label className="label" htmlFor="reset-pw">Password Baru <span className="text-red-500">*</span></label>
+                      <input type="password" id="reset-pw" className="input" placeholder="Minimal 8 karakter" value={resetNewPw} onChange={(e) => setResetNewPw(e.target.value)} disabled={resetLoading} />
+                    </div>
+                    <div className="form-group">
+                      <label className="label" htmlFor="reset-confirm">Konfirmasi Password <span className="text-red-500">*</span></label>
+                      <input type="password" id="reset-confirm" className="input" placeholder="Ulangi password baru" value={resetConfirmPw} onChange={(e) => setResetConfirmPw(e.target.value)} disabled={resetLoading} />
+                    </div>
+                    <div className="flex gap-3 pt-3 border-t border-gray-100 mt-5">
+                      <button type="button" onClick={handleCloseActionModal} disabled={resetLoading} className="btn-secondary flex-1">Batal</button>
+                      <button type="submit" disabled={resetLoading || !resetNewPw || !resetConfirmPw} className="btn-danger flex-1">
+                        {resetLoading ? (<><LoadingSpinner size="sm" color="white" /> Mereset...</>) : 'Reset Password'}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              ) : (
+                /* DELETE USER TAB */
+                <div>
+                  <h3 className="text-lg font-bold text-red-600 mb-1">Hapus Pengguna</h3>
+                  <p className="text-sm text-gray-500 mb-5">Tindakan ini <span className="font-semibold text-red-600">tidak dapat dibatalkan</span>.</p>
+
+                  <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-5">
+                    <div className="flex items-start gap-3">
+                      <svg className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                      </svg>
+                      <div>
+                        <p className="text-sm font-semibold text-red-800">Anda akan menghapus:</p>
+                        <p className="text-sm text-red-700 mt-1">Nama: <span className="font-bold">{actionUser.name}</span></p>
+                        <p className="text-sm text-red-700">NPM: <span className="font-mono font-bold">{actionUser.npm}</span></p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {deleteError && (
+                    <div className="alert-error mb-4 animate-fade-in">
+                      <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                      </svg>
+                      <span>{deleteError}</span>
+                    </div>
+                  )}
+
+                  <div className="form-group mb-5">
+                    <label className="label" htmlFor="delete-confirm-npm">Ketik NPM <span className="font-mono font-bold text-red-600">{actionUser.npm}</span> untuk konfirmasi</label>
+                    <input type="text" id="delete-confirm-npm" className="input font-mono" placeholder={actionUser.npm} value={deleteConfirmNpm} onChange={(e) => setDeleteConfirmNpm(e.target.value)} disabled={deleteLoading} />
+                  </div>
+
+                  <div className="flex gap-3 pt-3 border-t border-gray-100">
+                    <button type="button" onClick={handleCloseActionModal} disabled={deleteLoading} className="btn-secondary flex-1">Batal</button>
+                    <button
+                      type="button"
+                      onClick={handleDeleteUser}
+                      disabled={deleteLoading || deleteConfirmNpm !== actionUser.npm}
+                      className="btn-danger flex-1"
+                    >
+                      {deleteLoading ? (<><LoadingSpinner size="sm" color="white" /> Menghapus...</>) : 'Hapus Pengguna'}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
