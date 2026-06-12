@@ -23,6 +23,10 @@ export default function ManageUsersPage() {
   const [listError, setListError] = useState('');
   const [listSuccess, setListSuccess] = useState('');
 
+  // Pagination States
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
   // Edit User States
   const [editingUser, setEditingUser] = useState(null);
   const [editName, setEditName] = useState('');
@@ -60,6 +64,7 @@ export default function ManageUsersPage() {
         (a.name || '').localeCompare(b.name || '')
       );
       setUsers(sortedUsers);
+      setCurrentPage(1);
     } catch (err) {
       setListError(err.response?.data?.message || 'Gagal memuat daftar anggota.');
     } finally {
@@ -213,6 +218,19 @@ export default function ManageUsersPage() {
     }
   };
 
+  // Pagination calculations
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentUsers = users.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(users.length / itemsPerPage);
+
+  // If we delete the last item on the current page and it becomes empty, go to previous page
+  useEffect(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(totalPages);
+    }
+  }, [users.length, totalPages, currentPage]);
+
   return (
     <div className="animate-fade-in space-y-6">
       {/* Page Header */}
@@ -303,7 +321,7 @@ export default function ManageUsersPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {users.map((u) => (
+                  {currentUsers.map((u) => (
                     <tr key={u.npm || u.id}>
                       <td>
                         <div className="font-semibold text-gray-900">{u.name}</div>
@@ -343,6 +361,64 @@ export default function ManageUsersPage() {
                   ))}
                 </tbody>
               </table>
+              {users.length > 0 && totalPages > 1 && (
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-5 py-4 sm:py-3 border-t border-gray-100 bg-gray-50/50">
+                  <span className="text-sm text-gray-500 text-center sm:text-left">
+                    Menampilkan <span className="font-medium text-gray-900">{indexOfFirstItem + 1}</span> hingga{' '}
+                    <span className="font-medium text-gray-900">{Math.min(indexOfLastItem, users.length)}</span> dari{' '}
+                    <span className="font-medium text-gray-900">{users.length}</span> pengguna
+                  </span>
+                  <div className="flex flex-wrap justify-center items-center gap-1">
+                    <button
+                      onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                      disabled={currentPage === 1}
+                      className="p-1.5 rounded-lg text-gray-500 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
+                    
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                      if (
+                        page === 1 || 
+                        page === totalPages || 
+                        (page >= currentPage - 1 && page <= currentPage + 1)
+                      ) {
+                        return (
+                          <button
+                            key={page}
+                            onClick={() => setCurrentPage(page)}
+                            className={`w-8 h-8 flex items-center justify-center rounded-lg text-sm font-medium transition-colors ${
+                              currentPage === page
+                                ? 'bg-primary text-white'
+                                : 'text-gray-600 hover:bg-gray-200'
+                            }`}
+                          >
+                            {page}
+                          </button>
+                        );
+                      } else if (
+                        page === currentPage - 2 ||
+                        page === currentPage + 2
+                      ) {
+                        return <span key={page} className="px-1 text-gray-400">...</span>;
+                      }
+                      return null;
+                    })}
+
+                    <button
+                      onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                      disabled={currentPage === totalPages}
+                      className="p-1.5 rounded-lg text-gray-500 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
