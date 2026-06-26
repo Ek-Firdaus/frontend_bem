@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute, { ADMIN_ROLES, MEMBER_ROLES } from './components/ProtectedRoute';
+import { useAuth } from './hooks/useAuth';
 
 // Layouts
 import AdminLayout  from './components/layouts/AdminLayout';
@@ -10,18 +11,28 @@ import MemberLayout from './components/layouts/MemberLayout';
 import LoginPage from './pages/auth/LoginPage';
 
 // Admin pages
-import AdminDashboardPage from './pages/admin/DashboardPage';
+import SuperAdminDashboardPage from './pages/admin/SuperAdminDashboardPage';
+import EventListPage from './pages/admin/EventListPage';
+import AdminAnalyticsPage from './pages/admin/AdminAnalyticsPage';
 import CreateEventPage    from './pages/admin/CreateEventPage';
 import EventDetailPage    from './pages/admin/EventDetailPage';
 import ManageUsersPage    from './pages/admin/ManageUsersPage';
+import ManageInventoryPage from './pages/admin/ManageInventoryPage';
 
 // Member pages
 import MemberDashboardPage from './pages/member/DashboardPage';
 import AttendancePage      from './pages/member/AttendancePage';
 import HistoryPage         from './pages/member/HistoryPage';
 import ProfilePage         from './pages/member/ProfilePage';
+import InventoryCatalogPage from './pages/member/InventoryCatalogPage';
 
 export default function App() {
+  const AdminDashboardRouter = () => {
+    const { user } = useAuth();
+    if (user?.role === 'super_admin') return <SuperAdminDashboardPage />;
+    return <MemberDashboardPage basePath="/admin" />;
+  };
+
   return (
     <BrowserRouter>
       <AuthProvider>
@@ -39,9 +50,22 @@ export default function App() {
             }
           >
             <Route index element={<Navigate to="/admin/dashboard" replace />} />
-            <Route path="dashboard"    element={<AdminDashboardPage />} />
-            <Route path="events/new"   element={<CreateEventPage />} />
-            <Route path="events/:id"   element={<EventDetailPage />} />
+            <Route path="dashboard"    element={<AdminDashboardRouter />} />
+            <Route path="events"       element={
+              <ProtectedRoute allowedRoles={['super_admin', 'admin_psdm']}>
+                <EventListPage />
+              </ProtectedRoute>
+            } />
+            <Route path="events/new"   element={
+              <ProtectedRoute allowedRoles={['super_admin', 'admin_psdm']}>
+                <CreateEventPage />
+              </ProtectedRoute>
+            } />
+            <Route path="events/:id"   element={
+              <ProtectedRoute allowedRoles={['super_admin', 'admin_psdm']}>
+                <EventDetailPage />
+              </ProtectedRoute>
+            } />
             <Route
               path="users"
               element={
@@ -50,9 +74,25 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="inventory"
+              element={
+                <ProtectedRoute allowedRoles={['super_admin', 'admin_sekre']}>
+                  <ManageInventoryPage />
+                </ProtectedRoute>
+              }
+            />
             <Route path="attend"    element={<AttendancePage />} />
             <Route path="history"   element={<HistoryPage />} />
             <Route path="profile"   element={<ProfilePage />} />
+            <Route
+              path="analytics"
+              element={
+                <ProtectedRoute allowedRoles={['super_admin']}>
+                  <AdminAnalyticsPage />
+                </ProtectedRoute>
+              }
+            />
           </Route>
 
           {/* Member routes */}
@@ -69,6 +109,7 @@ export default function App() {
             <Route path="attend"    element={<AttendancePage />} />
             <Route path="history"   element={<HistoryPage />} />
             <Route path="profile"   element={<ProfilePage />} />
+            <Route path="inventory" element={<InventoryCatalogPage />} />
           </Route>
 
           {/* Root redirect */}

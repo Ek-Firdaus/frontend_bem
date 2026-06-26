@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../../api/axios';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 
 export default function ManageUsersPage() {
+  const navigate = useNavigate();
   // Tabs state
   const [activeTab, setActiveTab] = useState('list'); // 'list' or 'add'
 
@@ -234,9 +236,18 @@ export default function ManageUsersPage() {
   return (
     <div className="animate-fade-in space-y-6">
       {/* Page Header */}
-      <div className="page-header">
-        <h1 className="page-title">Kelola Pengguna</h1>
-        <p className="page-subtitle">Kelola akun anggota SIM BEM FTI. Pengguna tidak bisa mendaftar sendiri untuk menjaga keamanan data.</p>
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
+        <div className="flex items-start gap-3">
+          <button onClick={() => navigate(-1)} className="btn-ghost btn-sm p-2 mt-0.5 shrink-0" aria-label="Kembali">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <div className="page-header m-0">
+            <h1 className="page-title">Kelola Pengguna</h1>
+            <p className="page-subtitle">Kelola akun anggota SIM BEM FTI. Pengguna tidak bisa mendaftar sendiri untuk menjaga keamanan data.</p>
+          </div>
+        </div>
       </div>
 
       {/* Tabs Nav */}

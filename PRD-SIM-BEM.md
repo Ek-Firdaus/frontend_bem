@@ -77,13 +77,13 @@ Menambahkan endpoint untuk kelola users pada super admin
 
 ### Backend — 🔲 Belum Dimulai
 
-- [ ] `POST /assets` — Tambah aset baru + generate QR code
-- [ ] `GET /assets` — List semua aset
-- [ ] `GET /assets/:id` — Detail aset
-- [ ] `PUT /assets/:id` — Update data aset
-- [ ] `DELETE /assets/:id` — Hapus aset
-- [ ] `GET /assets/qr/:token` — Lookup aset via token QR
-- [ ] `PATCH /assets/:id/status` — Toggle status available/borrowed
+- [x] `POST /inventories` — Tambah aset baru + generate QR code
+- [x] `GET /inventories` — List semua aset
+- [x] `GET /inventories/:id` — Detail aset
+- [x] `PUT /inventories/:id` — Update data aset
+- [ ] `DELETE /inventories/:id` — Hapus aset
+- [ ] `GET /inventories/qr/:token` — Lookup aset via token QR
+- [ ] `PATCH /inventories/:id/status` — Toggle status available/borrowed
 
 ### Frontend — ⏸ Tunggu Backend Selesai
 

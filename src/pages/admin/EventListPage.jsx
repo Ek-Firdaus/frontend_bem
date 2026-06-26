@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import api from '../../api/axios';
 import { useAuth } from '../../hooks/useAuth';
 import StatusBadge from '../../components/ui/StatusBadge';
@@ -13,8 +13,12 @@ function formatDate(dateStr) {
   }).format(new Date(dateStr));
 }
 
-export default function AdminDashboardPage() {
+export default function EventListPage() {
   const { user } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const isEventsPage = location.pathname.includes('/admin/events');
   const [events, setEvents]   = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState('');
@@ -68,14 +72,25 @@ export default function AdminDashboardPage() {
   return (
     <div className="animate-fade-in">
       {/* Page header */}
-      <div className="page-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="page-title">Dashboard</h1>
-          <p className="page-subtitle">
-            Halo, <span className="font-semibold text-primary">{user?.name}</span> — kelola event absensi BEM FTI.
-          </p>
+      <div className="page-header flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+        <div className="flex items-start gap-3">
+          {isEventsPage && (
+            <button onClick={() => navigate(-1)} className="btn-ghost btn-sm p-2 mt-0.5 shrink-0" aria-label="Kembali">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+          )}
+          <div>
+            <h1 className="page-title">{isEventsPage ? 'Daftar Acara' : 'Dashboard'}</h1>
+            <p className="page-subtitle">
+              {isEventsPage 
+                ? 'Kelola daftar event dan pantau kehadiran.' 
+                : <>Halo, <span className="font-semibold text-primary">{user?.name}</span> — kelola event absensi BEM FTI.</>}
+            </p>
+          </div>
         </div>
-        <div className="flex flex-wrap gap-2.5 self-start sm:self-auto">
+        <div className={`flex flex-wrap gap-2.5 self-start sm:self-auto ${isEventsPage ? 'ml-10 sm:ml-0' : ''}`}>
           <button
             onClick={handleExportAll}
             disabled={exporting}
@@ -95,14 +110,7 @@ export default function AdminDashboardPage() {
               </>
             )}
           </button>
-          {user?.role === 'super_admin' && (
-            <Link to="/admin/users" className="btn-secondary btn-sm">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-              </svg>
-              Kelola User
-            </Link>
-          )}
+
           <Link to="/admin/events/new" className="btn-primary btn-sm">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
