@@ -3,9 +3,9 @@ import { useAuth } from '../hooks/useAuth';
 import LoadingSpinner from './ui/LoadingSpinner';
 
 // Admin roles
-export const ADMIN_ROLES  = ['super_admin', 'admin_psdm', 'admin_sekre', 'executive'];
+export const ADMIN_ROLES  = ['super_admin', 'admin_psdm', 'admin_sekre', 'admin_komdigi', 'admin_advokes', 'executive'];
 // Member-level roles (includes all roles since everyone can fill personal attendance)
-export const MEMBER_ROLES = ['super_admin', 'admin_psdm', 'member', 'pilar', 'admin_sekre', 'executive'];
+export const MEMBER_ROLES = ['super_admin', 'admin_psdm', 'member', 'pilar', 'admin_sekre', 'admin_komdigi', 'admin_advokes', 'executive'];
 
 /**
  * Redirect user to their correct dashboard based on role.

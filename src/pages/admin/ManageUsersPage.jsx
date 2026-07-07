@@ -3,6 +3,28 @@ import { useNavigate } from 'react-router-dom';
 import api from '../../api/axios';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 
+const ROLE_BADGE = {
+  super_admin:   'bg-violet-100 text-violet-700',
+  admin_psdm:    'bg-blue-100 text-blue-700',
+  admin_sekre:   'bg-amber-100 text-amber-700',
+  admin_komdigi: 'bg-teal-100 text-teal-700',
+  admin_advokes: 'bg-rose-100 text-rose-700',
+  executive:     'bg-indigo-100 text-indigo-700',
+  pilar:         'bg-orange-100 text-orange-700',
+  member:        'bg-gray-100 text-gray-600',
+};
+
+const ROLE_LABEL = {
+  super_admin:   'Super Admin',
+  admin_psdm:    'Admin PSDM',
+  admin_sekre:   'Admin Sekre',
+  admin_komdigi: 'Admin Komdigi',
+  admin_advokes: 'Admin Advokes',
+  executive:     'Executive',
+  pilar:         'Pilar',
+  member:        'Member',
+};
+
 export default function ManageUsersPage() {
   const navigate = useNavigate();
   // Tabs state
@@ -341,8 +363,8 @@ export default function ManageUsersPage() {
                       <td className="font-mono text-xs text-gray-600">{u.npm}</td>
                       <td className="hidden sm:table-cell text-gray-600 text-sm">{u.division}</td>
                       <td>
-                        <span className="inline-flex px-2 py-0.5 rounded-full text-[10px] font-semibold bg-primary/10 text-primary capitalize">
-                          {u.role?.replace('_', ' ')}
+                        <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-semibold capitalize ${ROLE_BADGE[u.role] || 'bg-gray-100 text-gray-600'}`}>
+                          {ROLE_LABEL[u.role] || u.role?.replace('_', ' ')}
                         </span>
                       </td>
                       <td className="text-right">
@@ -528,7 +550,10 @@ export default function ManageUsersPage() {
                   <option value="member">Member</option>
                   <option value="admin_psdm">Admin PSDM</option>
                   <option value="admin_sekre">Admin Sekretariat</option>
+                  <option value="admin_komdigi">Admin Komdigi</option>
+                  <option value="admin_advokes">Admin Advokasi</option>
                   <option value="pilar">Pilar</option>
+                  <option value="executive">Executive</option>
                   <option value="super_admin">Super Admin</option>
                 </select>
               </div>
@@ -630,7 +655,10 @@ export default function ManageUsersPage() {
                   <option value="member">Member</option>
                   <option value="admin_psdm">Admin PSDM</option>
                   <option value="admin_sekre">Admin Sekretariat</option>
+                  <option value="admin_komdigi">Admin Komdigi</option>
+                  <option value="admin_advokes">Admin Advokasi</option>
                   <option value="pilar">Pilar</option>
+                  <option value="executive">Executive</option>
                   <option value="super_admin">Super Admin</option>
                 </select>
               </div>

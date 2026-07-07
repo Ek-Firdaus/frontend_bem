@@ -18,6 +18,8 @@ import CreateEventPage    from './pages/admin/CreateEventPage';
 import EventDetailPage    from './pages/admin/EventDetailPage';
 import ManageUsersPage    from './pages/admin/ManageUsersPage';
 import ManageInventoryPage from './pages/admin/ManageInventoryPage';
+import ManageBlogPage     from './pages/admin/ManageBlogPage';
+import ManageComplaintsPage from './pages/admin/ManageComplaintsPage';
 
 // Member pages
 import MemberDashboardPage from './pages/member/DashboardPage';
@@ -79,6 +81,22 @@ export default function App() {
               element={
                 <ProtectedRoute allowedRoles={['super_admin', 'admin_sekre']}>
                   <ManageInventoryPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="blogs"
+              element={
+                <ProtectedRoute allowedRoles={['super_admin', 'admin_komdigi']}>
+                  <ManageBlogPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="complaints"
+              element={
+                <ProtectedRoute allowedRoles={['super_admin', 'admin_advokes']}>
+                  <ManageComplaintsPage />
                 </ProtectedRoute>
               }
             />

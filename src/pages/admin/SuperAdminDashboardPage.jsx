@@ -71,6 +71,33 @@ export default function SuperAdminDashboardPage() {
       ],
     },
     {
+      title: 'Website',
+      links: [
+        {
+          to: '/admin/blogs',
+          label: 'Kelola Blog',
+          desc: 'Buat, edit, dan hapus artikel website BEM.',
+          color: 'from-teal-600 to-teal-400',
+          icon: (
+            <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+            </svg>
+          ),
+        },
+        {
+          to: '/admin/complaints',
+          label: 'Kelola Pengaduan',
+          desc: 'Tinjau dan tanggapi pengaduan dari mahasiswa.',
+          color: 'from-rose-600 to-rose-400',
+          icon: (
+            <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+            </svg>
+          ),
+        },
+      ],
+    },
+    {
       title: 'Administrasi',
       links: [
         {
@@ -97,6 +124,7 @@ export default function SuperAdminDashboardPage() {
         },
       ],
     },
+    
     {
       title: 'Profil',
       links: [

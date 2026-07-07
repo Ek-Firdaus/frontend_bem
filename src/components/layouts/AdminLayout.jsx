@@ -30,6 +30,8 @@ export default function AdminLayout() {
       attend: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>,
       history: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>,
       profile: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>,
+      blog: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" /></svg>,
+      complaint: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" /></svg>,
     };
 
     if (user?.role === 'super_admin') {
@@ -43,6 +45,13 @@ export default function AdminLayout() {
             { to: '/admin/events', label: 'Daftar Acara', icon: icons.eventList },
             { to: '/admin/events/new', label: 'Buat Event', icon: icons.eventNew },
             { to: '/admin/inventory', label: 'Inventaris', icon: icons.inventory },
+          ]
+        },
+        {
+          title: 'Menu Konten',
+          items: [
+            { to: '/admin/blogs', label: 'Kelola Blog', icon: icons.blog },
+            { to: '/admin/complaints', label: 'Pengaduan', icon: icons.complaint },
           ]
         },
         {
@@ -102,6 +111,48 @@ export default function AdminLayout() {
       ];
     }
 
+    if (user?.role === 'admin_komdigi') {
+      return [
+        {
+          title: 'Website',
+          locked: true,
+          items: [
+            { to: '/admin/blogs', label: 'Kelola Blog', icon: icons.blog },
+          ]
+        },
+        {
+          title: 'Menu Mandiri',
+          items: [
+            { to: '/admin/dashboard', label: 'Beranda', icon: icons.dashboard },
+            { to: '/admin/attend', label: 'Absensi', icon: icons.attend },
+            { to: '/admin/history', label: 'Riwayat', icon: icons.history },
+            { to: '/admin/profile', label: 'Profil Saya', icon: icons.profile },
+          ]
+        }
+      ];
+    }
+
+    if (user?.role === 'admin_advokes') {
+      return [
+        {
+          title: 'Menu Advokasi',
+          locked: true,
+          items: [
+            { to: '/admin/complaints', label: 'Kelola Pengaduan', icon: icons.complaint },
+          ]
+        },
+        {
+          title: 'Menu Mandiri',
+          items: [
+            { to: '/admin/dashboard', label: 'Beranda', icon: icons.dashboard },
+            { to: '/admin/attend', label: 'Absensi', icon: icons.attend },
+            { to: '/admin/history', label: 'Riwayat', icon: icons.history },
+            { to: '/admin/profile', label: 'Profil Saya', icon: icons.profile },
+          ]
+        }
+      ];
+    }
+
     return [];
   };
 
@@ -114,7 +165,7 @@ export default function AdminLayout() {
   const sections = getSidebarSections();
 
   return (
-    <div className="flex h-screen bg-gray-50 overflow-hidden">
+    <div className="flex h-screen bg-gray-200 overflow-hidden">
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div
@@ -168,18 +219,34 @@ export default function AdminLayout() {
                 {openSections[section.title] && (
                   <div className="space-y-1">
                     {section.items.map((item) => (
-                      <NavLink
-                        key={item.to}
-                        to={item.to}
-                        end={item.to === '/admin/dashboard'}
-                        onClick={() => setSidebarOpen(false)}
-                        className={({ isActive }) =>
-                          `sidebar-link ${isActive ? 'active' : ''}`
-                        }
-                      >
-                        {item.icon}
-                        {item.label}
-                      </NavLink>
+                      section.locked ? (
+                        <div
+                          key={item.label}
+                          className="w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-lg text-slate-400 opacity-60 cursor-not-allowed grayscale"
+                          title="Menu sedang dalam pengembangan"
+                        >
+                          <div className="flex items-center gap-3">
+                            {item.icon}
+                            {item.label}
+                          </div>
+                          <svg className="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                      ) : (
+                        <NavLink
+                          key={item.to}
+                          to={item.to}
+                          end={item.to === '/admin/dashboard'}
+                          onClick={() => setSidebarOpen(false)}
+                          className={({ isActive }) =>
+                            `sidebar-link ${isActive ? 'active' : ''}`
+                          }
+                        >
+                          {item.icon}
+                          {item.label}
+                        </NavLink>
+                      )
                     ))}
                   </div>
                 )}

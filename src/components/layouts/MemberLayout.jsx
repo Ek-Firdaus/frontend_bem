@@ -150,7 +150,7 @@ export default function MemberLayout() {
   );
 
   return (
-    <div className="flex h-screen bg-gray-50 overflow-hidden">
+    <div className="flex h-screen bg-gray-200 overflow-hidden">
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div

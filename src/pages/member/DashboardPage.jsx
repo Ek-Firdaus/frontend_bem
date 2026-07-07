@@ -100,6 +100,48 @@ export default function MemberDashboardPage({ basePath = '/member' }) {
       });
     }
 
+    // ADVOKASI (admin_advokes)
+    if (user?.role === 'admin_advokes') {
+      sections.push({
+        title: 'Website',
+        locked: true,
+        links: [
+          {
+            to: '/admin/complaints',
+            label: 'Kelola Pengaduan',
+            desc: 'Tinjau dan tanggapi pengaduan dari mahasiswa.',
+            color: 'from-rose-600 to-rose-400',
+            icon: (
+              <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+              </svg>
+            )
+          }
+        ]
+      });
+    }
+
+    // KONTEN BLOG (admin_komdigi)
+    if (user?.role === 'admin_komdigi') {
+      sections.push({
+        title: 'Website',
+        locked: true,
+        links: [
+          {
+            to: '/admin/blogs',
+            label: 'Kelola Blog',
+            desc: 'Buat, edit, dan hapus artikel website BEM.',
+            color: 'from-teal-600 to-teal-400',
+            icon: (
+              <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+              </svg>
+            )
+          }
+        ]
+      });
+    }
+
     // PROFIL
     sections.push({
       title: 'Profil',
@@ -149,25 +191,54 @@ export default function MemberDashboardPage({ basePath = '/member' }) {
       <div className="space-y-8">
         {sections.map((section, idx) => (
           <div key={idx}>
-            <h2 className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-3">{section.title}</h2>
+            <div className="flex items-center gap-2 mb-3">
+              <h2 className="text-sm font-semibold text-gray-600 uppercase tracking-wide">{section.title}</h2>
+              {section.locked && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-gray-200 text-gray-500">
+                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                  </svg>
+                  SEGERA HADIR
+                </span>
+              )}
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {section.links.map((item) => (
-                <Link
-                  key={item.to}
-                  to={item.to}
-                  className="group card-hover flex items-center gap-4 p-5 no-underline"
-                >
-                  <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${item.color} flex items-center justify-center flex-shrink-0 shadow-md group-hover:scale-105 transition-transform duration-200`}>
-                    {item.icon}
+                section.locked ? (
+                  <div
+                    key={item.label}
+                    className="flex items-center gap-4 p-5 rounded-2xl border border-gray-100 bg-white opacity-60 grayscale cursor-not-allowed"
+                    title="Fitur ini sedang dalam pengembangan"
+                  >
+                    <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${item.color} flex items-center justify-center flex-shrink-0 shadow-sm`}>
+                      {item.icon}
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900">{item.label}</p>
+                      <p className="text-sm text-gray-500 mt-0.5">{item.desc}</p>
+                    </div>
+                    <svg className="w-5 h-5 text-gray-300 ml-auto flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                    </svg>
                   </div>
-                  <div>
-                    <p className="font-semibold text-gray-900 group-hover:text-primary transition-colors">{item.label}</p>
-                    <p className="text-sm text-gray-500 mt-0.5">{item.desc}</p>
-                  </div>
-                  <svg className="w-4 h-4 text-gray-300 ml-auto flex-shrink-0 group-hover:text-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                  </svg>
-                </Link>
+                ) : (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    className="group card-hover flex items-center gap-4 p-5 no-underline"
+                  >
+                    <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${item.color} flex items-center justify-center flex-shrink-0 shadow-md group-hover:scale-105 transition-transform duration-200`}>
+                      {item.icon}
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900 group-hover:text-primary transition-colors">{item.label}</p>
+                      <p className="text-sm text-gray-500 mt-0.5">{item.desc}</p>
+                    </div>
+                    <svg className="w-4 h-4 text-gray-300 ml-auto flex-shrink-0 group-hover:text-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </Link>
+                )
               ))}
             </div>
           </div>
