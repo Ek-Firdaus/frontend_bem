@@ -104,7 +104,6 @@ export default function MemberDashboardPage({ basePath = '/member' }) {
     if (user?.role === 'admin_advokes') {
       sections.push({
         title: 'Website',
-        locked: true,
         links: [
           {
             to: '/admin/complaints',
@@ -125,7 +124,6 @@ export default function MemberDashboardPage({ basePath = '/member' }) {
     if (user?.role === 'admin_komdigi') {
       sections.push({
         title: 'Website',
-        locked: true,
         links: [
           {
             to: '/admin/blogs',
