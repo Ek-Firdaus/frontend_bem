@@ -20,6 +20,7 @@ import ManageUsersPage    from './pages/admin/ManageUsersPage';
 import ManageInventoryPage from './pages/admin/ManageInventoryPage';
 import ManageBlogPage     from './pages/admin/ManageBlogPage';
 import ManageComplaintsPage from './pages/admin/ManageComplaintsPage';
+import ComplaintDetailPage  from './pages/admin/ComplaintDetailPage';
 
 // Member pages
 import MemberDashboardPage from './pages/member/DashboardPage';
@@ -97,6 +98,14 @@ export default function App() {
               element={
                 <ProtectedRoute allowedRoles={['super_admin', 'admin_advokes']}>
                   <ManageComplaintsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="complaints/:id"
+              element={
+                <ProtectedRoute allowedRoles={['super_admin', 'admin_advokes']}>
+                  <ComplaintDetailPage />
                 </ProtectedRoute>
               }
             />

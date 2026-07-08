@@ -115,7 +115,6 @@ export default function AdminLayout() {
       return [
         {
           title: 'Website',
-          locked: true,
           items: [
             { to: '/admin/blogs', label: 'Kelola Blog', icon: icons.blog },
           ]
@@ -136,7 +135,6 @@ export default function AdminLayout() {
       return [
         {
           title: 'Menu Advokasi',
-          locked: true,
           items: [
             { to: '/admin/complaints', label: 'Kelola Pengaduan', icon: icons.complaint },
           ]
