@@ -6,106 +6,58 @@ import LoadingSpinner from '../../components/ui/LoadingSpinner';
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function formatDate(dateStr) {
   if (!dateStr) return '-';
-  return new Intl.DateTimeFormat('id-ID', {
-    day: '2-digit', month: 'short', year: 'numeric',
-    hour: '2-digit', minute: '2-digit',
-  }).format(new Date(dateStr));
+  const date = new Date(dateStr);
+  const day = date.getDate();
+  const month = date.toLocaleString('id-ID', { month: 'short' });
+  const year = date.getFullYear();
+  const time = date.toLocaleString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace('.', ':');
+  return `${day} ${month} ${year}, ${time}`;
+}
+
+function getCategoryColor(category) {
+  const cat = (category || '').toLowerCase();
+  if (cat.includes('fasilitas')) return 'bg-orange-50 text-orange-700 border-orange-200';
+  if (cat.includes('akademik')) return 'bg-indigo-50 text-indigo-700 border-indigo-200';
+  if (cat.includes('layanan')) return 'bg-cyan-50 text-cyan-700 border-cyan-200';
+  if (cat.includes('kegiatan')) return 'bg-fuchsia-50 text-fuchsia-700 border-fuchsia-200';
+  if (cat.includes('lainnya')) return 'bg-rose-50 text-rose-700 border-rose-200';
+  
+  // Hash string to pick a color dynamically for unknown categories
+  const colors = [
+    'bg-pink-50 text-pink-700 border-pink-200',
+    'bg-violet-50 text-violet-700 border-violet-200',
+    'bg-sky-50 text-sky-700 border-sky-200',
+    'bg-lime-50 text-lime-700 border-lime-200'
+  ];
+  const index = cat.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  return colors[index % colors.length];
 }
 
 // ── Status Config ─────────────────────────────────────────────────────────────
 const STATUS_CONFIG = {
   pending: {
-    label: 'Menunggu',
-    badge: 'bg-yellow-100 text-yellow-700',
-    dot: 'bg-yellow-400',
+    label: 'Pending',
+    badge: 'bg-yellow-100 text-yellow-800',
+    dot: 'bg-yellow-500',
   },
   'on progress': {
     label: 'Diproses',
-    badge: 'bg-blue-100 text-blue-700',
-    dot: 'bg-blue-400',
+    badge: 'bg-blue-100 text-blue-800',
+    dot: 'bg-blue-500',
   },
   done: {
     label: 'Selesai',
-    badge: 'bg-emerald-100 text-emerald-700',
-    dot: 'bg-emerald-400',
+    badge: 'bg-emerald-100 text-emerald-800',
+    dot: 'bg-emerald-500',
   },
 };
 
 function StatusBadge({ status }) {
   const cfg = STATUS_CONFIG[status] || { label: status, badge: 'bg-gray-100 text-gray-600', dot: 'bg-gray-400' };
   return (
-    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${cfg.badge}`}>
-      <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
+    <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold tracking-wide ${cfg.badge}`}>
       {cfg.label}
     </span>
-  );
-}
-
-function InfoRow({ label, value }) {
-  return (
-    <div>
-      <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">{label}</p>
-      <p className="text-sm font-medium text-gray-900">{value || '-'}</p>
-    </div>
-  );
-}
-
-// ── Modal: Update Status ──────────────────────────────────────────────────────
-function UpdateStatusModal({ complaint, onClose, onUpdated }) {
-  const [status, setStatus] = useState(complaint?.status || 'pending');
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
-
-  const handleSubmit = async () => {
-    setSaving(true);
-    setError('');
-    try {
-      await api.patch(`/complaints/${complaint.id}`, { status });
-      onUpdated(status);
-    } catch (err) {
-      setError(err.response?.data?.message || 'Gagal memperbarui status.');
-      setSaving(false);
-    }
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm animate-fade-in p-6">
-        <h3 className="font-bold text-gray-900 mb-1">Update Status Pengaduan</h3>
-        <p className="text-sm text-gray-500 mb-5 truncate">{complaint?.title}</p>
-
-        {error && <div className="alert-error text-sm mb-4">{error}</div>}
-
-        <div className="space-y-2 mb-6">
-          {Object.entries(STATUS_CONFIG).map(([key, cfg]) => (
-            <label
-              key={key}
-              className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${
-                status === key ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'
-              }`}
-            >
-              <input type="radio" name="status" value={key} checked={status === key}
-                onChange={() => setStatus(key)} className="sr-only" />
-              <span className={`w-3 h-3 rounded-full flex-shrink-0 ${cfg.dot}`} />
-              <span className={`text-sm font-semibold ${status === key ? 'text-primary' : 'text-gray-700'}`}>
-                {cfg.label}
-              </span>
-            </label>
-          ))}
-        </div>
-
-        <div className="flex gap-3">
-          <button onClick={onClose} className="btn-ghost btn-sm flex-1" disabled={saving}>Batal</button>
-          <button
-            onClick={handleSubmit}
-            disabled={saving || status === complaint?.status}
-            className="btn-primary btn-sm flex-1"
-          >
-            {saving ? <LoadingSpinner size="sm" color="white" /> : 'Simpan'}
-          </button>
-        </div>
-      </div>
-    </div>
   );
 }
 
@@ -116,11 +68,20 @@ export default function ComplaintDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [lightbox, setLightbox] = useState(null);
-  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+
+  // Status Update State
+  const [updateStatus, setUpdateStatus] = useState('');
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     fetchComplaint();
   }, [id]);
+
+  useEffect(() => {
+    if (complaint) {
+      setUpdateStatus(complaint.status);
+    }
+  }, [complaint]);
 
   const fetchComplaint = async () => {
     try {
@@ -134,9 +95,18 @@ export default function ComplaintDetailPage() {
     }
   };
 
-  const handleStatusUpdated = (newStatus) => {
-    setComplaint((prev) => ({ ...prev, status: newStatus }));
-    setIsUpdateModalOpen(false);
+  const handleUpdateStatus = async () => {
+    if (updateStatus === complaint.status) return;
+    setSaving(true);
+    try {
+      await api.patch(`/complaints/${complaint.id}`, { status: updateStatus });
+      setComplaint((prev) => ({ ...prev, status: updateStatus }));
+      // Optional: Update timestamp if you want to reflect it immediately
+    } catch (err) {
+      alert(err.response?.data?.message || 'Gagal memperbarui status.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (loading) {
@@ -162,167 +132,178 @@ export default function ComplaintDetailPage() {
   const isAnonymous = complaint.is_anonymous;
 
   return (
-    <div className="max-w-4xl mx-auto animate-fade-in pb-10">
-      {/* Top Bar: Back & Title */}
-      <div className="page-header flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
-        <div className="flex items-start gap-3">
-          <button onClick={() => navigate('/admin/complaints')} className="btn-ghost btn-sm p-2 mt-0.5 shrink-0" aria-label="Kembali">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-          <div>
-            <h1 className="page-title">Detail Pengaduan</h1>
-            <p className="page-subtitle">Lihat dan tanggapi pengaduan #{complaint.id}</p>
-          </div>
+    <div className="max-w-3xl mx-auto animate-fade-in pb-12">
+      
+      {/* Back Button */}
+      <button onClick={() => navigate('/admin/complaints')} className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 mb-6 transition-colors">
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+        Kembali
+      </button>
+
+      {/* Header: ID & Status */}
+      <div className="flex justify-between items-end mb-6 px-2">
+        <div>
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">ID Pengaduan</p>
+          <h1 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight">
+            #{complaint.id}
+          </h1>
         </div>
+        <StatusBadge status={complaint.status} />
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-        {/* Header Content */}
-        <div className="px-6 sm:px-8 py-6 border-b border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <StatusBadge status={complaint.status} />
-              {isAnonymous && (
-                <span className="px-2.5 py-1 bg-gray-200 text-gray-600 rounded-lg text-[10px] font-bold tracking-wide">
-                  ANONIM
-                </span>
-              )}
-            </div>
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 leading-tight">
-              {complaint.title}
-            </h2>
-            <p className="text-sm text-gray-500 mt-2 flex items-center gap-1.5">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+      <div className="space-y-4">
+        
+        {/* 1. Identitas Pengadu */}
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+          <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-5">Identitas Pengadu</h2>
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center shrink-0 text-gray-400">
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
-              Dilaporkan pada: {formatDate(complaint.created_at)}
-            </p>
-          </div>
-
-          <div className="shrink-0">
-            {complaint.status !== 'done' && (
-              <button
-                onClick={() => setIsUpdateModalOpen(true)}
-                className="w-full sm:w-auto btn-primary shadow-md"
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                Tanggapi & Update
-              </button>
+            </div>
+            {isAnonymous ? (
+              <div>
+                <p className="font-bold text-gray-900 text-lg">Anonim</p>
+                <p className="text-sm text-gray-500 font-medium">{complaint.prodi || '-'}</p>
+                <p className="text-xs text-gray-400 mt-2 italic">
+                  * Nama dan NPM disembunyikan karena pengadu memilih opsi anonim.
+                </p>
+              </div>
+            ) : (
+              <div>
+                <p className="font-bold text-gray-900 text-lg">{complaint.full_name}</p>
+                <p className="text-sm text-gray-500 font-medium mt-0.5">
+                  {complaint.npm || '-'} — {complaint.prodi || '-'}
+                </p>
+              </div>
             )}
           </div>
         </div>
 
-        {/* Body Content */}
-        <div className="p-6 sm:p-8 space-y-8">
-          {/* Reporter Info */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 p-5 bg-gray-50 rounded-2xl border border-gray-100">
-            <InfoRow label="Pelapor" value={isAnonymous ? '— Anonim —' : complaint.full_name} />
-            <InfoRow label="NPM" value={isAnonymous ? '-' : complaint.npm} />
-            <InfoRow label="Prodi" value={complaint.prodi} />
-            <InfoRow label="Kategori" value={complaint.category} />
+        {/* 2. Detail Aspirasi */}
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+          <div className="flex justify-between items-start mb-4 gap-4">
+            <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest shrink-0">Detail Aspirasi</h2>
+            <span className={`px-3 py-1 text-xs font-bold rounded-lg shrink-0 border ${getCategoryColor(complaint.category)}`}>
+              {complaint.category || 'Lainnya'}
+            </span>
           </div>
-
-          {/* Description */}
-          <div>
-            <h3 className="text-base font-bold text-gray-900 flex items-center gap-2 mb-3">
-              <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
-              </svg>
-              Isi Pengaduan
-            </h3>
-            <div className="text-gray-700 leading-relaxed whitespace-pre-wrap">
-              {complaint.description}
-            </div>
-          </div>
-
-          {/* Suggestion */}
+          <h3 className="text-lg font-bold text-gray-900 mb-3">{complaint.title}</h3>
+          <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed mb-5">
+            {complaint.description}
+          </p>
+          
           {complaint.suggestion && (
-            <div>
-              <h3 className="text-base font-bold text-gray-900 flex items-center gap-2 mb-3">
-                <svg className="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                </svg>
-                Harapan / Saran
-              </h3>
-              <div className="p-5 bg-blue-50/50 text-blue-900 rounded-2xl border border-blue-100 whitespace-pre-wrap leading-relaxed">
+            <>
+              <hr className="border-gray-100 my-4" />
+              <p className="text-xs font-semibold text-gray-500 mb-2">Saran penyelesaian</p>
+              <p className="text-sm text-gray-800 font-medium whitespace-pre-wrap leading-relaxed">
                 {complaint.suggestion}
-              </div>
-            </div>
+              </p>
+            </>
           )}
+        </div>
 
-          {/* Contact Details */}
-          {complaint.willing_to_contact && (
-            <div>
-              <h3 className="text-base font-bold text-gray-900 flex items-center gap-2 mb-3">
-                <svg className="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                </svg>
-                Kontak Pelapor
-              </h3>
-              <div className="flex items-center gap-3">
-                <div className="px-4 py-2 bg-green-50 text-green-700 font-semibold rounded-lg border border-green-200">
-                  {complaint.whatsapp_number}
-                </div>
-                <a
-                  href={`https://wa.me/${complaint.whatsapp_number.replace(/\D/g, '').replace(/^0/, '62')}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn-success btn-sm"
+        {/* 3. Bukti Pendukung */}
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+          <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-5">Bukti Pendukung</h2>
+          {evidences.length > 0 ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+              {evidences.map((ev, i) => (
+                <button
+                  key={ev.file_public_id || ev.id || i}
+                  onClick={() => ev.file_type?.startsWith('image') && setLightbox(ev.file_url)}
+                  className={`group relative aspect-square rounded-2xl overflow-hidden border border-gray-200 transition-all duration-300 ${ev.file_type?.startsWith('image') ? 'cursor-pointer hover:border-primary hover:shadow-lg hover:-translate-y-1' : 'cursor-default'}`}
                 >
-                  Hubungi via WhatsApp
+                  {ev.file_type?.startsWith('image') ? (
+                    <>
+                      <img src={ev.file_url} alt={`Bukti ${i + 1}`} className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                        <svg className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                        </svg>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="w-full h-full bg-gray-50 flex flex-col items-center justify-center gap-2 text-gray-400">
+                      <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                      </svg>
+                      <span className="text-[10px] font-medium max-w-[80%] truncate text-center">
+                        {ev.file_url.split('/').pop() || 'Dokumen'}
+                      </span>
+                    </div>
+                  )}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-500">Tidak ada bukti pendukung yang dilampirkan.</p>
+          )}
+        </div>
+
+        {/* 4. Kontak */}
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+          <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-5">Kontak</h2>
+          {complaint.willing_to_contact ? (
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-full bg-green-50 border border-green-200 flex items-center justify-center shrink-0 text-green-500 shadow-sm">
+                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                </svg>
+              </div>
+              <div className="pt-0.5">
+                <p className="font-bold text-gray-900 text-md mb-0.5">Bersedia dihubungi</p>
+                <a 
+                  href={`https://wa.me/${complaint.whatsapp_number.replace(/\D/g, '').replace(/^0/, '62')}`} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="text-sm font-semibold text-gray-500 hover:text-green-600 transition-colors hover:underline"
+                  title="Hubungi via WhatsApp"
+                >
+                  {complaint.whatsapp_number}
                 </a>
               </div>
             </div>
+          ) : (
+            <p className="text-sm text-gray-500">Pelapor tidak bersedia dihubungi via kontak pribadi.</p>
           )}
-
-          {/* Evidences */}
-          <div>
-            <h3 className="text-base font-bold text-gray-900 flex items-center gap-2 mb-4">
-              <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01" />
-              </svg>
-              Bukti Lampiran ({evidences.length})
-            </h3>
-            
-            {evidences.length > 0 ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                {evidences.map((ev, i) => (
-                  <button
-                    key={ev.file_public_id || ev.id || i}
-                    onClick={() => setLightbox(ev.file_url)}
-                    className="group relative aspect-square rounded-2xl overflow-hidden border border-gray-200 hover:border-primary hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
-                  >
-                    {ev.file_type?.startsWith('image') ? (
-                      <>
-                        <img src={ev.file_url} alt={`Bukti ${i + 1}`} className="w-full h-full object-cover" />
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                          <svg className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
-                          </svg>
-                        </div>
-                      </>
-                    ) : (
-                      <div className="w-full h-full bg-gray-50 flex flex-col items-center justify-center gap-2 text-gray-400 group-hover:text-primary group-hover:bg-primary/5 transition-colors">
-                        <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-                        </svg>
-                        <span className="text-xs font-medium">File Lampiran</span>
-                      </div>
-                    )}
-                  </button>
-                ))}
-              </div>
-            ) : (
-              <div className="p-8 text-center bg-gray-50 rounded-2xl border border-gray-100 border-dashed">
-                <p className="text-gray-400">Tidak ada file bukti yang dilampirkan.</p>
-              </div>
-            )}
-          </div>
         </div>
+
+        {/* 5. Tindak Lanjut */}
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+          <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-5">Tindak Lanjut</h2>
+          <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+            <select
+              value={updateStatus}
+              onChange={(e) => setUpdateStatus(e.target.value)}
+              className="flex-1 w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-semibold"
+            >
+              <option value="pending">Pending (Menunggu)</option>
+              <option value="on progress">Diproses</option>
+              <option value="done">Selesai</option>
+            </select>
+            <button
+              onClick={handleUpdateStatus}
+              disabled={saving || updateStatus === complaint.status}
+              className="btn-primary rounded-xl py-3 px-6 whitespace-nowrap w-full sm:w-auto font-bold shadow-md shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {saving ? <LoadingSpinner size="sm" color="white" /> : 'Simpan status'}
+            </button>
+          </div>
+          <p className="text-[11px] text-gray-400 mt-4">
+            Dikirim {formatDate(complaint.created_at)}
+            {complaint.updated_at && complaint.updated_at !== complaint.created_at && (
+              <span className="inline-block ml-1">
+                • Diperbarui {formatDate(complaint.updated_at)}
+              </span>
+            )}
+          </p>
+        </div>
+
       </div>
 
       {/* Lightbox for images */}
@@ -335,15 +316,6 @@ export default function ComplaintDetailPage() {
           </button>
           <img src={lightbox} alt="Bukti (Diperbesar)" className="max-w-full max-h-[90vh] rounded-xl shadow-2xl object-contain" />
         </div>
-      )}
-
-      {/* Update Modal */}
-      {isUpdateModalOpen && (
-        <UpdateStatusModal
-          complaint={complaint}
-          onClose={() => setIsUpdateModalOpen(false)}
-          onUpdated={handleStatusUpdated}
-        />
       )}
     </div>
   );

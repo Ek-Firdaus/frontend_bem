@@ -1,6 +1,6 @@
 /**
  * TokenDisplay — shows the event token prominently for admin.
- * token: 6-char alphanumeric string from backend (nanoid(6))
+ * token: 4-char alphanumeric string from backend
  */
 export default function TokenDisplay({ token, isActive }) {
   const chars = token ? token.split('') : [];
@@ -41,7 +41,7 @@ export default function TokenDisplay({ token, isActive }) {
       ) : (
         <div className="flex flex-col items-center gap-2">
           <div className="flex gap-2">
-            {[...Array(6)].map((_, i) => (
+            {[...Array(4)].map((_, i) => (
               <div
                 key={i}
                 className="w-11 h-14 sm:w-14 sm:h-18 rounded-xl border-2 border-dashed border-gray-200 bg-gray-50"

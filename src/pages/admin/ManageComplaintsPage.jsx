@@ -17,6 +17,25 @@ function truncate(str, max = 60) {
   return str.length > max ? str.slice(0, max) + '…' : str;
 }
 
+function getCategoryColor(category) {
+  const cat = (category || '').toLowerCase();
+  if (cat.includes('fasilitas')) return 'bg-orange-50 text-orange-700 border-orange-200';
+  if (cat.includes('akademik')) return 'bg-indigo-50 text-indigo-700 border-indigo-200';
+  if (cat.includes('layanan')) return 'bg-cyan-50 text-cyan-700 border-cyan-200';
+  if (cat.includes('kegiatan')) return 'bg-fuchsia-50 text-fuchsia-700 border-fuchsia-200';
+  if (cat.includes('lainnya')) return 'bg-rose-50 text-rose-700 border-rose-200';
+  
+  // Hash string to pick a color dynamically for unknown categories
+  const colors = [
+    'bg-pink-50 text-pink-700 border-pink-200',
+    'bg-violet-50 text-violet-700 border-violet-200',
+    'bg-sky-50 text-sky-700 border-sky-200',
+    'bg-lime-50 text-lime-700 border-lime-200'
+  ];
+  const index = cat.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  return colors[index % colors.length];
+}
+
 // ── Status Config — sesuai database constraint ────────────────────────────────
 const STATUS_CONFIG = {
   pending: {
@@ -295,8 +314,8 @@ export default function ManageComplaintsPage() {
 
                   {/* Badges — Kategori + Bukti + Status */}
                   <div className="flex flex-wrap items-center gap-1.5">
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-rose-50 text-rose-700 border border-rose-100">
-                      {c.category}
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold border ${getCategoryColor(c.category)}`}>
+                      {c.category || 'Lainnya'}
                     </span>
                     {c.evidence_count > 0 && (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-100">
